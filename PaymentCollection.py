@@ -113,4 +113,7 @@ class PaymentCollection:
         :param peopleToExclude: People to exclude from the full set of people for this object (for the shared payment)
         :type peopleToExclude: set[str]
         """
-        self.payments.append(SharedPayment(recipient, list(self.people.difference(peopleToExclude)), amount))
+        payers = self.people.difference(peopleToExclude)
+        if len(payers) == 0:
+            raise Exception("Must have at least one payer--make sure list of people is set")
+        self.payments.append(SharedPayment(list(payers), recipient, amount))

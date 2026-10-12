@@ -110,14 +110,14 @@ class SharedPayment(Payment):
     A payment that needs to be shared between 2 or more people
     """
 
-    def __init__(self, recipient : str, payers : list[str], amount : float):
+    def __init__(self, payers : list[str], recipient : str, amount : float):
         """
         Initialize new shared payment
         
+        :param payers: List of people responsible for the payment who together need to pay the recipient (may include the recipient)
+        :type payers: list[str]
         :param recipient: The person who paid the expense initially and needs to be paid
         :type recipient: str
-        :param payers: List of people responsible for the payment who together need to pay the recipient
-        :type payers: list[str]
         :param amount: Amount, in dollars, of expense
         :type amount: float
         """
@@ -174,6 +174,8 @@ class SharedPayment(Payment):
         :param value: List of people responsible for payment who together need to pay the recipient
         :type value: list[str]
         """
+        if len(value) == 0:
+            raise Exception("Payers list must have length > 0")
         self._payers = value
 
     @amount.setter
