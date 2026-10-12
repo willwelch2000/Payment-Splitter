@@ -116,4 +116,4 @@ class PaymentCollection:
         payers = self.people.difference(peopleToExclude)
         if len(payers) == 0:
             raise Exception("Must have at least one payer--make sure list of people is set")
-        self.payments.append(SharedPayment(list(payers), recipient, amount))
+        self.payments.append(SharedPayment(payers, recipient, amount))
