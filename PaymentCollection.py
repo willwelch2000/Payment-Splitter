@@ -94,8 +94,8 @@ class PaymentCollection:
                 if val > maxOwed[1]:
                     maxOwed = (p, val)
             # Check for end case or impossibility
-            if minOwed[1] == 0.0 or maxOwed[1] == 0.0:
-                if not (minOwed[1] == 0.0 and maxOwed[1] == 0.0):
+            if minOwed[1] > -1e-5 or maxOwed[1] < 1e-5:
+                if not (minOwed[1] > -1e-5 and maxOwed[1] < 1e-5):
                     raise Exception("Something impossible happened")
                 return newPaymentList
             # Add new transaction to list and adjust amounts owed

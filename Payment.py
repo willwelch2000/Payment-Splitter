@@ -189,9 +189,12 @@ class SharedPayment(Payment):
         self._amount = float(value)
 
     def getAmountsOwed(self) -> dict[str, float]:
-        owed = {payer: -self.amount/len(self.payers) for payer in self.payers}
+        # Because of rounding, recipient may get slightly more or less than expected
+        numPayers = len(self.payers)
+        dividedValue = round(self.amount/numPayers, 2)
+        owed = {payer: -dividedValue for payer in self.payers}
         if self.recipient in owed:
-            owed[self.recipient] += self.amount
+            owed[self.recipient] += dividedValue*numPayers
         else:
-            owed[self.recipient] = self.amount
+            owed[self.recipient] = dividedValue*numPayers
         return owed
