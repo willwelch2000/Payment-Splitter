@@ -1,5 +1,6 @@
 from PaymentCollection import *
 from pathlib import Path
+from Util import checkValidAmount, checkValidName
 
 def createFile(collection : PaymentCollection, path : Path):
     lines : list[str] = []
@@ -33,32 +34,32 @@ def parseFile(path : Path) -> PaymentCollection:
         keyword, remaining = line[0:colonIndex].strip().lower(), line[(colonIndex+1):].strip()
         match keyword:
             case "people":
-                people = [_checkValidName(p) for p in _splitCommasWithBracketAwareness(remaining)]
+                people = [checkValidName(p) for p in _splitCommasWithBracketAwareness(remaining)]
                 collection.people = set(people)
             case "direct payment":
                 values = _splitCommasWithBracketAwareness(remaining)
                 if len(values) != 3:
                     raise Exception("Direct payment statement should be: {payer}, {recipient}, {value}")
-                payer = _checkValidName(values[0])
-                recipient = _checkValidName(values[1])
-                amount = _checkValidAmount(values[2])
+                payer = checkValidName(values[0])
+                recipient = checkValidName(values[1])
+                amount = checkValidAmount(values[2])
                 collection.payments.append(DirectPayment(payer, recipient, amount))
             case "shared payment":
                 values = _splitCommasWithBracketAwareness(remaining)
                 if len(values) != 3:
                     raise Exception("Direct payment statement should be: {[payers]}, {recipient}, {value}")
                 
-                recipient = _checkValidName(values[1])
-                amount = _checkValidAmount(values[2])
+                recipient = checkValidName(values[1])
+                amount = checkValidAmount(values[2])
 
                 lowerCaseFirstGroup = values[0].lower()
                 if lowerCaseFirstGroup.startswith("["):
-                    payers = set([_checkValidName(p) for p in _splitCommasWithBracketAwareness(values[0][1:-1])])
+                    payers = set([checkValidName(p) for p in _splitCommasWithBracketAwareness(values[0][1:-1])])
                     collection.payments.append(SharedPayment(payers, recipient, amount))
                 elif lowerCaseFirstGroup == "all":
                     collection.addSharedPayment(recipient, amount)
                 elif lowerCaseFirstGroup.startswith("all except ["):
-                    excepted = [_checkValidName(p) for p in _splitCommasWithBracketAwareness(values[0][12:-1])]
+                    excepted = [checkValidName(p) for p in _splitCommasWithBracketAwareness(values[0][12:-1])]
                     collection.addSharedPayment(recipient, amount, set(excepted))
             case _:
                 raise Exception("Unknown keyword: " + keyword)
@@ -90,17 +91,3 @@ def _splitCommasWithBracketAwareness(line : str) -> list[str]:
         raise Exception(f"Brackets don't cancel out--should have {bracketCount} more closing brackets")
     pieces.append(line[start:].strip())
     return pieces
-
-def _checkValidName(name : str) -> str:
-    if len(name) == 0:
-        raise Exception("Name must have > 0 characters")
-    invalidChars = [" ", "[", "]", ","]
-    if any(char in name for char in invalidChars):
-        raise Exception("Invalid name: " + name)
-    return name
-
-def _checkValidAmount(amount : str) -> float:
-    if len(amount) == 0:
-        raise Exception("Amount must have > 0 characters")
-    start = 1 if amount[0] == "$" else 0
-    return float(amount[start:])
