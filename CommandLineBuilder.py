@@ -44,6 +44,8 @@ class CommandLineBuilder:
             "Add payment" : "Add a new shared payment",
             "View payments" : "View all payments included in the collection",
             "Save" : "Save payment collection to a file",
+            "Load" : "Load file as the collection",
+            "Analyze" : "Analyze the payment collection to see who owes what",
             "Finish" : "Exit the command line loop and analyze the payment collection",
             "Condense" : "Set the system to output payers in a shared payment using 'All' if possible",
             "No condense" : "Set the system to output individual payers in a shared payment rather than using 'All'",
@@ -70,6 +72,12 @@ class CommandLineBuilder:
             case "save":
                 filename = input("File name: ")
                 createFile(self.collection, Path(filename))
+            case "load":
+                filename = input("File name: ")
+                self.collection = parseFile(Path(filename))
+            case "analyze":
+                for payment in self.collection.getSimplifiedPayments():
+                    print(payment)
             case "finish":
                 for payment in self.collection.getSimplifiedPayments():
                     print(payment)
@@ -117,7 +125,8 @@ class CommandLineBuilder:
         else:
             usingAll = input("Shared between all? (y/n): ").lower().strip() == "y"
             if usingAll:
-                exclude = [checkValidName(s.strip()) for s in input("People to exclude (comma separated): ").split(",")]
+                excludeStr = input("People to exclude (comma separated): ").strip()
+                exclude = [] if len(excludeStr) == 0 else [checkValidName(s.strip()) for s in excludeStr.split(",")]
                 recipient, amount = _getRecipientAndAmount()
                 self.collection.addSharedPayment(recipient, amount, set(exclude))
             else:
