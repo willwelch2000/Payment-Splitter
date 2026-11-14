@@ -83,6 +83,12 @@ def refreshGUI():
     for payment in list(addedPaymentFrames):
         if payment not in collection.payments:
             addedPaymentFrames.pop(payment).destroy()
+    # Update necessary transactions
+    for transactionFrame in necessaryTransactionFrames:
+        transactionFrame.destroy()
+    necessaryTransactionFrames.clear()
+    for payment in collection.getSimplifiedPayments():
+        necessaryTransactionFrames.append(getCalculatedPaymentFrame(payment))
 
 def getAddedPersonFrame(person : str) -> ttk.Frame:
     frm = ttk.Frame(peopleFrm)
@@ -96,13 +102,24 @@ def getAddedPaymentFrame(payment : Payment) -> ttk.Frame:
     frm = ttk.Frame(addedPaymentsFrame)
     frm.pack(side="top", anchor="w")
     if isinstance(payment, DirectPayment):
-        ttk.Label(frm, text=str(payment), font=font_normal).grid(row=0, column=0)
+        getDirectPaymentLabel(payment, frm)
     elif isinstance(payment, SharedPayment):
         text = f"Multiple to {payment.recipient}: ${payment.amount:.2f}"
         ttk.Label(frm, text=text, font=font_normal).grid(row=0, column=0)
     remove = lambda : removePayment(payment)
     ttk.Button(frm, text="Remove", command=remove).grid(row=0, column=1)
     return frm
+
+def getCalculatedPaymentFrame(payment : DirectPayment) -> ttk.Frame:
+    frm = ttk.Frame(calculationsFrame)
+    frm.pack(side="top", anchor="w")
+    getDirectPaymentLabel(payment, frm)
+    return frm
+
+def getDirectPaymentLabel(payment : DirectPayment, parent : ttk.Frame) -> ttk.Label:
+    label = ttk.Label(parent, text=str(payment), font=font_normal)
+    label.grid(row=0, column=0)
+    return label
 
 # Data validation
 def validateAmount(val):
@@ -172,6 +189,12 @@ ttk.Button(allPaymentsFrm, text="Submit payment", command=addPayment).pack(side=
 addedPaymentsFrame = ttk.Frame(paymentsFrm)
 addedPaymentsFrame.grid(row=4, column=0, sticky="w", pady=10)
 addedPaymentFrames : dict[Payment, ttk.Frame] = {}
+
+# Calculations
+calculationsFrame = ttk.Frame(frm)
+calculationsFrame.grid(row=2, column=0, columnspan=2, pady=20)
+ttk.Label(calculationsFrame, text="Necesarry transactions", font=font_header).pack(side="top")
+necessaryTransactionFrames : list[ttk.Frame] = []
 
 # Hide stuff
 allPaymentsFrm.grid_remove()
