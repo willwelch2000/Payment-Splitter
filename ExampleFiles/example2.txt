@@ -1,0 +1,5 @@
+People: Mari, Cole, Will, Claire
+Direct payment: Will, Cole, $100.15
+Shared payment: [Mari, Will], Cole, $200.00
+Shared payment: All except [Will], Mari, $50.00
+Shared payment: All, Mari, $10.00
