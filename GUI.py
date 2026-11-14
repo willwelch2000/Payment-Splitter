@@ -58,6 +58,10 @@ def addPayment():
     amountVar.set("")
     sharedPayersVar.set("")
     refreshGUI()
+    
+def removePayment(payment : Payment):
+    collection.payments.remove(payment)
+    refreshGUI()
 
 def allPayersCheckboxToggle():
     widgets : list[tk.Widget] = [sharedPayersLabel, sharedPayersEntry]
@@ -65,18 +69,38 @@ def allPayersCheckboxToggle():
     [w.grid_remove() if allPayers else w.grid() for w in widgets]
 
 def refreshGUI():
+    # Manage people
     for person in collection.people:
         if person not in addedPeopleFrames:
             addedPeopleFrames[person] = getAddedPersonFrame(person)
     for person in list(addedPeopleFrames):
         if person not in collection.people:
             addedPeopleFrames.pop(person).destroy()
+    # Manage payments
+    for payment in collection.payments:
+        if payment not in addedPaymentFrames:
+            addedPaymentFrames[payment] = getAddedPaymentFrame(payment)
+    for payment in list(addedPaymentFrames):
+        if payment not in collection.payments:
+            addedPaymentFrames.pop(payment).destroy()
 
 def getAddedPersonFrame(person : str) -> ttk.Frame:
     frm = ttk.Frame(peopleFrm)
     frm.pack(side="top", anchor="w")
     ttk.Label(frm, text=person, font=font_normal).grid(row=0, column=0)
     remove = lambda : removePerson(person)
+    ttk.Button(frm, text="Remove", command=remove).grid(row=0, column=1)
+    return frm
+
+def getAddedPaymentFrame(payment : Payment) -> ttk.Frame:
+    frm = ttk.Frame(addedPaymentsFrame)
+    frm.pack(side="top", anchor="w")
+    if isinstance(payment, DirectPayment):
+        ttk.Label(frm, text=str(payment), font=font_normal).grid(row=0, column=0)
+    elif isinstance(payment, SharedPayment):
+        text = f"Multiple to {payment.recipient}: ${payment.amount:.2f}"
+        ttk.Label(frm, text=text, font=font_normal).grid(row=0, column=0)
+    remove = lambda : removePayment(payment)
     ttk.Button(frm, text="Remove", command=remove).grid(row=0, column=1)
     return frm
 
@@ -144,7 +168,10 @@ allPaymentsFrm = ttk.Frame(paymentsFrm)
 allPaymentsFrm.grid(row=3, column=0)
 ttk.Button(allPaymentsFrm, text="Submit payment", command=addPayment).pack(side="left")
 
-addedPaymentFrames : dict[Payment, ttk.Frame]
+# List of added payments
+addedPaymentsFrame = ttk.Frame(paymentsFrm)
+addedPaymentsFrame.grid(row=4, column=0, sticky="w", pady=10)
+addedPaymentFrames : dict[Payment, ttk.Frame] = {}
 
 # Hide stuff
 allPaymentsFrm.grid_remove()
