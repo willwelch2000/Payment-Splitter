@@ -149,7 +149,7 @@ def run_GUI():
 
     # Payments
     paymentsFrm = ttk.Frame(frm)
-    paymentsFrm.grid(row=1, column=1, padx=10)
+    paymentsFrm.grid(row=1, column=1, padx=10, sticky="n")
 
     paymentTypeFrm = ttk.Frame(paymentsFrm)
     paymentTypeFrm.grid(row=0, column=0)
@@ -203,3 +203,4 @@ def run_GUI():
     sharedPaymentFrm.grid_remove()
 
     root.mainloop()
+run_GUI()
